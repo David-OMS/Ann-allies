@@ -1,3 +1,5 @@
+**Interactive Dashboard:** [View Dashboard](https://ann-allies.streamlit.app/)
+
 Project Purpose
 
 This project analyzes daily sales and production records for a small yoghurt producer, covering March–April 2024.
