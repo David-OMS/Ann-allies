@@ -148,7 +148,9 @@ with col1:
         y=monthly_df['revenue'],
         mode='lines+markers',
         line=dict(color='#2E86AB', width=3),
-        marker=dict(size=12, color='white', line=dict(width=2.5, color='#2E86AB'))
+        marker=dict(size=12, color='white', line=dict(width=2.5, color='#2E86AB')),
+        hovertemplate='<b>%{x}</b><br>Revenue: ₦%{y:,.0f}<extra></extra>',
+        hoverlabel=dict(bgcolor='white', bordercolor='#2E86AB', font_size=12, font_color='#2C3E50')
     ))
     
     # Update layout
@@ -164,6 +166,7 @@ with col1:
         plot_bgcolor='#FAFAFA',
         paper_bgcolor='#FFFFFF',
         hovermode='closest',
+        hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=11, font_color='#2C3E50'),
         margin=dict(l=60, r=20, t=80, b=60),
         font=dict(size=11, color='#34495E', family='Arial, sans-serif')
     )
@@ -208,13 +211,16 @@ with col2:
     fig2 = go.Figure()
     fig2.add_trace(go.Bar(
         x=units_by_product.values, y=product_names, orientation='h',
-        marker=dict(color=colors_list, line=dict(color='white', width=1.5)), opacity=0.85
+        marker=dict(color=colors_list, line=dict(color='white', width=1.5)), opacity=0.85,
+        hovertemplate='<b>%{y}</b><br>Units: %{x:,}<extra></extra>',
+        hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=12, font_color='#2C3E50')
     ))
     fig2.update_layout(
         title=dict(text="Total Units Sold per Product", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
         height=400, showlegend=False,
         plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
         hovermode='closest',
+        hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=11, font_color='#2C3E50'),
         xaxis=dict(
             title="Units Sold",
             title_font=dict(color='#34495E', size=12, family='Arial, sans-serif', weight='bold'),
@@ -240,13 +246,18 @@ with col1:
     short_names = [f"{name.split()[0]}<br>{'500' if '500ml' in name else '250'}" for name in comparison.index]
     
     fig3 = go.Figure()
-    fig3.add_trace(go.Bar(name='Produced', x=short_names, y=comparison['Produced'], marker=dict(color='#06A77D', line=dict(color='white', width=1.5)), opacity=0.85))
-    fig3.add_trace(go.Bar(name='Recorded Sales', x=short_names, y=comparison['Sold'], marker=dict(color='#C73E1D', line=dict(color='white', width=1.5)), opacity=0.85))
+    fig3.add_trace(go.Bar(name='Produced', x=short_names, y=comparison['Produced'], marker=dict(color='#06A77D', line=dict(color='white', width=1.5)), opacity=0.85,
+                         hovertemplate='<b>%{x}</b><br>Produced: %{y:,}<extra></extra>',
+                         hoverlabel=dict(bgcolor='white', bordercolor='#06A77D', font_size=12, font_color='#2C3E50')))
+    fig3.add_trace(go.Bar(name='Recorded Sales', x=short_names, y=comparison['Sold'], marker=dict(color='#C73E1D', line=dict(color='white', width=1.5)), opacity=0.85,
+                          hovertemplate='<b>%{x}</b><br>Recorded Sales: %{y:,}<extra></extra>',
+                          hoverlabel=dict(bgcolor='white', bordercolor='#C73E1D', font_size=12, font_color='#2C3E50')))
     fig3.update_layout(
         title=dict(text="Production vs Recorded Sales", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
         barmode='group', height=400,
         plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
         hovermode='closest',
+        hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=11, font_color='#2C3E50'),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, bgcolor='rgba(255,255,255,0.95)', font=dict(size=11, color='#2C3E50', family='Arial, sans-serif', weight='bold')),
         yaxis=dict(
             title="Units",
@@ -283,12 +294,15 @@ with col2:
     
     fig6 = go.Figure()
     fig6.add_trace(go.Bar(x=top_5_products.values, y=product_names, orientation='h',
-                         marker=dict(color=colors_list, line=dict(color='white', width=1.5)), opacity=0.85))
+                         marker=dict(color=colors_list, line=dict(color='white', width=1.5)), opacity=0.85,
+                         hovertemplate='<b>%{y}</b><br>Revenue: ₦%{x:,.0f}<extra></extra>',
+                         hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=12, font_color='#2C3E50')))
     fig6.update_layout(
         title=dict(text="Top 5 Products by Revenue", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
         height=400, showlegend=False,
         plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
         hovermode='closest',
+        hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=11, font_color='#2C3E50'),
         xaxis=dict(
             title="Revenue (₦)",
             title_font=dict(color='#34495E', size=12, family='Arial, sans-serif', weight='bold'),
@@ -325,16 +339,24 @@ with col1:
     # 250ml bars
     size_250 = size_comparison[size_comparison['product_size'] == '250ml'].iloc[0]
     fig4.add_trace(go.Bar(name='250ml Units', x=['250ml_units'], y=[size_250['quantity_sold']],
-                          marker=dict(color='#F18F01', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=False)
+                          marker=dict(color='#F18F01', line=dict(color='white', width=1.5)), opacity=0.85,
+                          hovertemplate='<b>250ml Units</b><br>Units: %{y:,}<extra></extra>',
+                          hoverlabel=dict(bgcolor='white', bordercolor='#F18F01', font_size=12, font_color='#2C3E50')), secondary_y=False)
     fig4.add_trace(go.Bar(name='250ml Revenue', x=['250ml_revenue'], y=[size_250['total_sales']],
-                          marker=dict(color='#A23B72', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=True)
+                          marker=dict(color='#A23B72', line=dict(color='white', width=1.5)), opacity=0.85,
+                          hovertemplate='<b>250ml Revenue</b><br>Revenue: ₦%{y:,.0f}<extra></extra>',
+                          hoverlabel=dict(bgcolor='white', bordercolor='#A23B72', font_size=12, font_color='#2C3E50')), secondary_y=True)
     
     # 500ml bars
     size_500 = size_comparison[size_comparison['product_size'] == '500ml'].iloc[0]
     fig4.add_trace(go.Bar(name='500ml Units', x=['500ml_units'], y=[size_500['quantity_sold']],
-                          marker=dict(color='#F18F01', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=False)
+                          marker=dict(color='#F18F01', line=dict(color='white', width=1.5)), opacity=0.85,
+                          hovertemplate='<b>500ml Units</b><br>Units: %{y:,}<extra></extra>',
+                          hoverlabel=dict(bgcolor='white', bordercolor='#F18F01', font_size=12, font_color='#2C3E50')), secondary_y=False)
     fig4.add_trace(go.Bar(name='500ml Revenue', x=['500ml_revenue'], y=[size_500['total_sales']],
-                          marker=dict(color='#A23B72', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=True)
+                          marker=dict(color='#A23B72', line=dict(color='white', width=1.5)), opacity=0.85,
+                          hovertemplate='<b>500ml Revenue</b><br>Revenue: ₦%{y:,.0f}<extra></extra>',
+                          hoverlabel=dict(bgcolor='white', bordercolor='#A23B72', font_size=12, font_color='#2C3E50')), secondary_y=True)
     
     fig4.update_xaxes(
         title_text="",
@@ -405,12 +427,15 @@ with col2:
     
     fig5 = go.Figure()
     fig5.add_trace(go.Bar(x=flavor_revenue.index, y=flavor_revenue.values,
-                         marker=dict(color=colors, line=dict(color='white', width=1.5)), opacity=0.85))
+                         marker=dict(color=colors, line=dict(color='white', width=1.5)), opacity=0.85,
+                         hovertemplate='<b>%{x}</b><br>Revenue: ₦%{y:,.0f}<extra></extra>',
+                         hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=12, font_color='#2C3E50')))
     fig5.update_layout(
         title=dict(text="Revenue by Flavor", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
         height=400, showlegend=False,
         plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
         hovermode='closest',
+        hoverlabel=dict(bgcolor='white', bordercolor='#34495E', font_size=11, font_color='#2C3E50'),
         yaxis=dict(
             title="Revenue (₦)",
             title_font=dict(color='#34495E', size=12, family='Arial, sans-serif', weight='bold'),
