@@ -1,9 +1,10 @@
 # Scripts
 scripts/
-*.py
+# Allow dashboard app
+!dashboard_app.py
 
-# Requirements
-requirements.txt
+# Requirements (allow requirements.txt for project)
+# requirements.txt
 
 # Database
 *.db

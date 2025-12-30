@@ -1,66 +1,97 @@
-# FreshDay Yoghurt - Sales & Production Analysis
+Project Purpose
 
-## Project Purpose
+This project analyzes daily sales and production records for a small yoghurt producer, covering March–April 2024.
+The work involved cleaning manually maintained Excel logs, validating calculations, and producing clear operational reporting with explicit documentation of data limitations.
 
-Analysis of daily sales and production data for FreshDay Yoghurt (March–April 2024). Cleaned manual Excel logs, validated calculations, and produced reporting with clear documentation of data limitations.
+Data Cleaning Summary
+Sales Data
 
-## Data Cleaning Summary
+Standardized product names to a consistent flavor + size format
+(e.g., “Strawberry” → “Strawberry Yoghurt 500ml”)
 
-**Sales Data:**
-- Standardized product names (e.g., "Strawberry" → "Strawberry Yoghurt 500ml")
-- Standardized date formats to YYYY-MM-DD
-- Recalculated totals where quantity × price ≠ total
-- Calculated missing values (unit_price from total/quantity, quantity from total/price)
-- Added date column to all entries
+Standardized all date formats to YYYY-MM-DD
 
-**Production Data:**
-- Standardized product names to match sales data
-- Standardized date formats
-- Validated numeric fields
+Recalculated total sales values where quantity × unit_price did not match recorded totals
 
-**Output:** Cleaned CSVs and Excel files ready for analysis.
+Where either unit_price or quantity was missing and sufficient information existed, values were recalculated for consistency
 
-## KPIs Reported
+Rows with insufficient information were left unchanged
 
-- **Total Revenue:** ₦3.73M (from 42 recorded sales days)
-- **Total Units Sold:** 3,474 units
-- **Total Units Produced:** 6,016 units
-- **Active Products:** 10 SKUs (5 flavors × 2 sizes)
+Verified that all records contained valid dates
 
-## Key Insights
+Production Data
 
-- Plain 250ml leads unit sales (highest volume SKU)
-- Plain 500ml generates highest revenue despite lower unit volume than 250ml variants
-- Production (6,016 units) exceeds sales (3,474 units) by 73%, consistent with 7-day shelf life inventory management
-- 250ml products drive volume while 500ml products drive revenue
-- Production occurs on 18 days over 2 months (max 2 days per week)
-- Sales activity recorded on 42 days out of ~60 business days (10 days missing from logs)
+Standardized product names to match cleaned sales data
 
-## Data Limitations & Reporting Confidence
+Standardized date formats
 
-**High Confidence:**
-- Total revenue: Exact from cleaned sales data (42 recorded days)
-- Units sold: Exact counts from validated records
+Validated numeric fields for obvious entry errors
 
-**Medium Confidence:**
-- Production totals: Based on irregular logging (18 days), may be incomplete
-- Monthly trends: Reliable within recorded days scope
+Output: Cleaned Excel and CSV files suitable for SQL analysis and reporting.
 
-**Known Gaps:**
-- 10 sales days missing from logs (could be closures or data entry gaps)
-- Production records irregular (not all SKUs logged every production day)
-- No expiry, batch, or waste tracking data available
-- Some sales may be unlogged (manual entry system)
+KPIs Reported
 
-**Analyses Not Performed:**
-- Inventory turnover (stock data unavailable)
-- Product expiry/waste analysis (no expiry data)
-- Profit margins (no cost data)
-- Seasonal trends (insufficient data period)
+Total Revenue: ₦3.73M
+(Based on 42 recorded sales days; missing days may affect totals)
 
-## Project Structure
+Total Units Sold: 3,474 units
+(Exact count from available sales records)
 
-```
+Total Units Produced: 6,016 units
+(Based on recorded production logs only)
+
+Active Products: 10 SKUs
+(5 flavors × 2 sizes)
+
+Key Insights
+
+Plain 250ml records the highest unit sales among all SKUs
+
+Plain 500ml generates the highest revenue despite lower unit volume than several 250ml variants
+
+Recorded production (6,016 units) exceeds recorded sales (3,474 units) by approximately 73%
+Due to the absence of expiry, waste, and complete stock movement data, the cause of this gap cannot be fully validated
+
+250ml products account for the majority of unit volume, while 500ml products contribute a larger share of revenue
+
+Production activity is logged on 18 days across the two-month period, aligning with a maximum of two production days per week
+
+Sales activity is recorded on 42 days out of approximately 60 calendar days, indicating possible missing logs or non-trading days
+
+Data Limitations & Reporting Confidence
+High Confidence
+
+Total revenue: Calculated from cleaned and validated sales records
+
+Units sold: Exact counts from recorded sales entries
+
+Medium Confidence
+
+Production totals: Based on irregular production logs and may be incomplete
+
+Monthly trends: Reliable only within the scope of recorded sales days
+
+Known Gaps
+
+Approximately 10 days of sales activity are missing from logs (cause not identifiable)
+
+Production records are not consistently available for all products on every production day
+
+No expiry dates, batch tracking, or waste data
+
+Manual data entry increases the risk of unrecorded or duplicate transactions
+
+Analyses Not Performed
+
+Inventory turnover (insufficient stock movement data)
+
+Product expiry or waste analysis (no expiry data)
+
+Profitability or margin analysis (no cost data)
+
+Seasonal trend analysis (data period too short)
+
+Project Structure
 FreshDay_Yoghurt_Analysis/
 ├── data/
 │   ├── daily_sales_raw.xlsx
@@ -72,11 +103,20 @@ FreshDay_Yoghurt_Analysis/
 ├── dashboard/
 │   └── freshday_dashboard.png
 └── README.md
-```
 
-## Files
+Files
 
-- **Raw Data:** `data/daily_sales_raw.xlsx`, `data/production_stock_log_raw.xlsx`
-- **Cleaned Data:** `data/daily_sales_clean.xlsx`, `data/production_stock_log_clean.xlsx`
-- **SQL Queries:** `sql/analysis_queries.sql`
-- **Dashboard:** `dashboard/freshday_dashboard.png`
+Raw Data:
+data/daily_sales_raw.xlsx
+data/production_stock_log_raw.xlsx
+
+Cleaned Data:
+data/daily_sales_clean.xlsx
+data/production_stock_log_clean.xlsx
+
+SQL Queries:
+sql/analysis_queries.sql
+
+Dashboard:
+dashboard/freshday_dashboard.png (static image)
+dashboard_app.py (interactive web application)
