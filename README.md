@@ -99,4 +99,4 @@ FreshDay_Yoghurt_Analysis/
 
 ### Dashboard
 - `dashboard/freshday_dashboard.png` (static image)
-- `dashboard_app.py` (interactive web application)
+- `dashboard_app.py` (interactive dashboard)
