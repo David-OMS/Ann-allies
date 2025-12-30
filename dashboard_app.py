@@ -363,7 +363,8 @@ with col1:
         tickmode='array',
         tickvals=['250ml_units', '250ml_revenue', '500ml_units', '500ml_revenue'],
         ticktext=['250ml<br>Units', '250ml<br>Revenue', '500ml<br>Units', '500ml<br>Revenue'],
-        tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+        tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold'),
+        fixedrange=True
     )
     fig4.update_yaxes(
         title_text="Units Sold", secondary_y=False,
@@ -374,26 +375,47 @@ with col1:
     )
     
     # Calculate revenue tick values with auto K/M formatting
-    max_revenue = size_comparison['total_sales'].max()
-    revenue_ticks = []
+    max_revenue = float(size_comparison['total_sales'].max())
+    min_revenue = float(size_comparison['total_sales'].min())
+    
+    # Ensure range starts from 0 and goes up (not inverted)
+    revenue_min = 0
+    revenue_max = max_revenue * 1.15
+    
+    # Create evenly spaced ticks from 0 to max
+    num_ticks = 5
+    tick_step = revenue_max / (num_ticks - 1)
+    revenue_ticks = [i * tick_step for i in range(num_ticks)]
     revenue_labels = []
-    step = max(500000, max_revenue / 4)
-    for i in range(5):
-        val = i * step
-        if val <= max_revenue * 1.2:
-            revenue_ticks.append(val)
-            if val >= 1e6:
-                revenue_labels.append(f'{val/1e6:.1f}M')
-            else:
-                revenue_labels.append(f'{val/1e3:.0f}K')
+    for val in revenue_ticks:
+        val_int = int(round(val))
+        if val_int >= 1000000:
+            revenue_labels.append(f'{val_int/1000000:.1f}M')
+        elif val_int >= 1000:
+            revenue_labels.append(f'{val_int/1000:.0f}K')
+        else:
+            revenue_labels.append(f'{val_int:,}')
     
     fig4.update_yaxes(
         title_text="Revenue (₦)", secondary_y=True,
         tickcolor='#A23B72',
         title_font=dict(color='#A23B72', size=12, family='Arial, sans-serif', weight='bold'),
         tickfont=dict(color='#A23B72', size=10, family='Arial, sans-serif', weight='bold'),
+        tickmode='array',
         tickvals=revenue_ticks,
-        ticktext=revenue_labels
+        ticktext=revenue_labels,
+        range=[revenue_min, revenue_max],
+        showticklabels=True,
+        side='right',
+        autorange=False,
+        fixedrange=True,
+        scaleanchor=None,
+        scaleratio=None,
+        showline=False,
+        showgrid=False,
+        ticks='',
+        ticklen=0,
+        tickwidth=0
     )
     fig4.update_layout(
         title=dict(text="250ml vs 500ml Performance", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
@@ -404,9 +426,12 @@ with col1:
             font=dict(size=11, color='#2C3E50', family='Arial, sans-serif', weight='bold')
         ),
         margin=dict(l=60, r=60, t=80, b=90),
-        font=dict(size=11, color='#34495E', family='Arial, sans-serif')
+        font=dict(size=11, color='#34495E', family='Arial, sans-serif'),
+        dragmode=False,
+        xaxis=dict(fixedrange=True),
+        yaxis=dict(fixedrange=True)
     )
-    st.plotly_chart(fig4, use_container_width=True)
+    st.plotly_chart(fig4, use_container_width=True, config={'displayModeBar': False, 'displaylogo': False, 'modeBarButtonsToRemove': ['pan2d', 'zoom2d', 'select2d', 'lasso2d', 'autoScale2d', 'resetScale2d']})
 
 with col2:
     flavor_revenue = sales.groupby('product_flavor')['total_sales'].sum().sort_values(ascending=False)
