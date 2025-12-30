@@ -42,18 +42,18 @@ This project analyzes daily sales and production records for a small yoghurt pro
 ## Data Limitations & Reporting Confidence
 
 ### High Confidence
-- Total revenue: Calculated from cleaned and validated sales records
-- Units sold: Exact counts from recorded sales entries
-
+- Total revenue: Calculated directly from cleaned sales records. All totals were validated after correcting pricing and quantity errors.
+- Units sold: Exact counts from recorded sales entries.
+  
 ### Medium Confidence
-- Production totals: Based on irregular production logs and may be incomplete
+- Production totals: Production quantities are reliable for the days recorded. However, the data does not indicate whether days or products with no entries reflect zero production or missing logs.
 - Monthly trends: Reliable only within the scope of recorded sales days
 
 ### Known Gaps
-- Approximately 10 days of sales activity are missing from logs (cause not identifiable)
-- Production records are not consistently available for all products on every production day
-- No expiry dates, batch tracking, or waste data
-- Manual data entry increases the risk of unrecorded or duplicate transactions
+- Sales activity is recorded on 42 days. The dataset does not specify whether days with no entries represent shop closures, zero sales, or missing records.
+- On production days, not all products appear in the logs. It is unclear whether this reflects selective production or incomplete recording.
+- No expiry dates, batch numbers, waste, or cost data are available.
+- All data was entered manually, which increases the risk of unrecorded or duplicated transactions, although no systematic issues were identified during cleaning.
 
 ### Analyses Not Performed
 - Inventory turnover (insufficient stock movement data)
