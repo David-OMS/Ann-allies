@@ -1,50 +1,85 @@
 """
 Interactive FreshDay Yoghurt Dashboard
-Streamlit web application for exploring sales and production analysis
 """
 
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
-# Page config
-st.set_page_config(
-    page_title="FreshDay Yoghurt Analysis",
-    page_icon="🥛",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="FreshDay Yoghurt Analysis", layout="wide", initial_sidebar_state="collapsed")
 
-# Custom CSS
 st.markdown("""
-    <style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #2C3E50;
-        text-align: center;
-        margin-bottom: 0.5rem;
+<style>
+    .stApp { 
+        background-color: #FFFFFF; 
+        background-image: linear-gradient(to bottom, #FAFBFC 0%, #FFFFFF 100%);
     }
-    .sub-header {
-        font-size: 1rem;
-        color: #7F8C8D;
-        text-align: center;
-        margin-bottom: 2rem;
+    .main .block-container { 
+        padding-top: 2rem; 
+        padding-bottom: 2rem; 
+        max-width: 100%; 
     }
-    .kpi-card {
-        background-color: #F8F9FA;
-        padding: 1rem;
-        border-radius: 10px;
-        border-left: 4px solid #06A77D;
+    h1, h2, h3 { 
+        color: #2C3E50; 
+        font-weight: 700;
+        letter-spacing: -0.3px;
     }
-    </style>
+    .stSubheader {
+        font-weight: 700 !important;
+        color: #2C3E50 !important;
+        margin-bottom: 1rem !important;
+        font-size: 1.3rem !important;
+        visibility: visible !important;
+        display: block !important;
+    }
+    h3 {
+        color: #2C3E50 !important;
+        font-weight: 700 !important;
+        visibility: visible !important;
+        display: block !important;
+    }
+    /* Remove Streamlit branding */
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+    header { visibility: hidden; }
+    /* Chart containers */
+    .element-container {
+        border-radius: 8px;
+        padding: 0.5rem;
+        background-color: #FFFFFF;
+    }
+    /* Ensure all text is visible */
+    .js-plotly-plot .xtitle, .js-plotly-plot .ytitle {
+        fill: #34495E !important;
+        font-weight: 600 !important;
+    }
+    .js-plotly-plot text {
+        fill: #34495E !important;
+        font-weight: bold !important;
+    }
+    .js-plotly-plot .ytick text, .js-plotly-plot .xtick text {
+        fill: #34495E !important;
+        font-weight: bold !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+</style>
 """, unsafe_allow_html=True)
 
-# Load data
+# Colors
+kpi_colors = ['#2E86AB', '#06A77D', '#F18F01', '#A23B72']
+product_colors = {
+    'Plain': '#2E86AB',
+    'Strawberry': '#C73E1D',
+    'Banana': '#F18F01',
+    'Coconut': '#06A77D',
+    'Pineapple': '#A23B72'
+}
+
 @st.cache_data
 def load_data():
     sales = pd.read_csv('cleaned_data/daily_sales_cleaned.csv')
@@ -55,148 +90,348 @@ def load_data():
 
 sales, production = load_data()
 
-# Header
-st.markdown('<p class="main-header">🥛 FreshDay Yoghurt Analysis</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">March–April 2024 | Sales & Production Summary</p>', unsafe_allow_html=True)
-
-# Calculate KPIs
+# KPIs
 total_revenue = sales['total_sales'].sum()
-total_units_sold = sales['quantity_sold'].sum()
-total_produced = production['quantity_produced'].sum()
+total_units_sold = int(sales['quantity_sold'].sum())
+total_produced = int(production['quantity_produced'].sum())
 unique_products = sales['product_name'].nunique()
-sales_days = sales['date'].nunique()
 
-# KPI Cards
-col1, col2, col3, col4 = st.columns(4)
+# Header - enhanced
+st.markdown('<h1 style="text-align: center; font-size: 2rem; font-weight: 700; color: #2C3E50; margin-bottom: 0.5rem; letter-spacing: -0.5px;">FreshDay Yoghurt Analysis</h1>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; font-size: 0.95rem; color: #7F8C8D; font-style: italic; margin-bottom: 2rem; font-weight: 400;">March–April 2024 | Sales & production summary</p>', unsafe_allow_html=True)
 
-with col1:
-    st.metric("Total Revenue", f"₦{total_revenue/1e6:.2f}M", help="Total revenue from recorded sales")
+# KPI Cards - enhanced with shadows and gradients
+kpi_html = f"""
+<div style="display: flex; gap: 1.5rem; margin-bottom: 2.5rem; justify-content: center; padding: 0 1rem;">
+    <div style="flex: 0 0 22%; background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%); border: 2px solid #2E86AB; border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(46, 134, 171, 0.15);">
+        <div style="font-size: 0.8rem; font-weight: 600; color: #2C3E50; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Revenue</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #2E86AB; line-height: 1.2;">₦{total_revenue/1e6:.2f}M</div>
+    </div>
+    <div style="flex: 0 0 22%; background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%); border: 2px solid #06A77D; border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(6, 167, 125, 0.15);">
+        <div style="font-size: 0.8rem; font-weight: 600; color: #2C3E50; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Units Sold</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #06A77D; line-height: 1.2;">{total_units_sold:,}</div>
+    </div>
+    <div style="flex: 0 0 22%; background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%); border: 2px solid #F18F01; border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(241, 143, 1, 0.15);">
+        <div style="font-size: 0.8rem; font-weight: 600; color: #2C3E50; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Units Produced</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #F18F01; line-height: 1.2;">{total_produced:,}</div>
+    </div>
+    <div style="flex: 0 0 22%; background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%); border: 2px solid #A23B72; border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(162, 59, 114, 0.15);">
+        <div style="font-size: 0.8rem; font-weight: 600; color: #2C3E50; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px;">Active Products</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #A23B72; line-height: 1.2;">{unique_products}</div>
+    </div>
+</div>
+"""
+st.markdown(kpi_html, unsafe_allow_html=True)
 
-with col2:
-    st.metric("Units Sold", f"{total_units_sold:,}", help="Total units sold across all products")
-
-with col3:
-    st.metric("Units Produced", f"{total_produced:,}", help="Total units produced")
-
-with col4:
-    st.metric("Active Products", f"{unique_products}", help="Number of unique SKUs")
-
-# Main Charts
-st.markdown("---")
-
-# Chart 1: Monthly Revenue Trend
-st.subheader("📈 Monthly Revenue Trend")
-monthly_revenue = sales.groupby(sales['date'].dt.to_period('M'))['total_sales'].sum().reset_index()
-monthly_revenue['date'] = monthly_revenue['date'].astype(str)
-fig1 = px.line(monthly_revenue, x='date', y='total_sales', 
-               markers=True, line_shape='linear',
-               labels={'date': 'Month', 'total_sales': 'Revenue (₦)'},
-               color_discrete_sequence=['#06A77D'])
-fig1.update_traces(line_width=3, marker_size=10)
-fig1.update_layout(height=400, showlegend=False,
-                  xaxis_title="Month", yaxis_title="Revenue (₦)",
-                  yaxis=dict(tickformat=".0f"))
-st.plotly_chart(fig1, use_container_width=True)
-
-# Chart 2 & 3: Side by side
+# ROW 1: 2 charts side by side
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("📊 Units Sold by Product")
-    product_sales = sales.groupby('product_name')['quantity_sold'].sum().sort_values(ascending=True).tail(10)
-    fig2 = px.bar(product_sales, orientation='h', 
-                 labels={'value': 'Units Sold', 'index': 'Product'},
-                 color_discrete_sequence=['#F18F01'])
-    fig2.update_layout(height=400, showlegend=False,
-                      xaxis_title="Units Sold", yaxis_title="")
+    # Get monthly revenue data
+    monthly_data = sales.groupby(sales['date'].dt.to_period('M'))['total_sales'].sum()
+    monthly_data.index = monthly_data.index.to_timestamp()
+    monthly_df = pd.DataFrame({'date': monthly_data.index, 'revenue': monthly_data.values})
+    monthly_df['date_str'] = monthly_df['date'].dt.strftime('%b %Y')
+    
+    # Calculate y-axis range to show variation
+    max_rev = float(monthly_df['revenue'].max())
+    min_rev = float(monthly_df['revenue'].min())
+    diff = max_rev - min_rev
+    padding = diff * 0.15 if diff > 0 else max_rev * 0.1
+    y_min = max(0, min_rev - padding)
+    y_max = max_rev + padding
+    
+    # Create figure
+    fig1 = go.Figure()
+    fig1.add_trace(go.Scatter(
+        x=monthly_df['date_str'],
+        y=monthly_df['revenue'],
+        mode='lines+markers',
+        line=dict(color='#2E86AB', width=3),
+        marker=dict(size=12, color='white', line=dict(width=2.5, color='#2E86AB'))
+    ))
+    
+    # Update layout
+    fig1.update_layout(
+        title=dict(
+            text="Monthly Revenue Trend",
+            font=dict(size=16, color='#2C3E50', family='Arial, sans-serif'),
+            x=0.5,
+            xanchor='center'
+        ),
+        height=400,
+        showlegend=False,
+        plot_bgcolor='#FAFAFA',
+        paper_bgcolor='#FFFFFF',
+        hovermode='closest',
+        margin=dict(l=60, r=20, t=80, b=60),
+        font=dict(size=11, color='#34495E', family='Arial, sans-serif')
+    )
+    
+    # Use simple automatic formatting with range
+    fig1.update_yaxes(
+        title="Revenue (₦)",
+        title_font=dict(color='#34495E', size=12, family='Arial, sans-serif'),
+        tickfont=dict(color='#34495E', size=11, family='Arial, sans-serif'),
+        gridcolor='rgba(0,0,0,0.3)',
+        gridwidth=0.8,
+        griddash='dash',
+        showticklabels=True,
+        showgrid=True,
+        showline=True,
+        linecolor='#34495E',
+        linewidth=2,
+        mirror=True,
+        range=[y_min, y_max],
+        tickformat=',.0f',
+        tickprefix='₦',
+        dtick=(y_max - y_min) / 4
+    )
+    
+    fig1.update_xaxes(
+        title="Month",
+        title_font=dict(color='#34495E', size=12, family='Arial, sans-serif'),
+        tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif'),
+        showticklabels=True,
+        showline=True,
+        linecolor='#34495E',
+        linewidth=2,
+        mirror=True
+    )
+    st.plotly_chart(fig1, use_container_width=True)
+
+with col2:
+    units_by_product = sales.groupby('product_name')['quantity_sold'].sum().sort_values(ascending=True)
+    product_names = [f"{name.split()[0]} {'500' if '500ml' in name else '250'}" for name in units_by_product.index]
+    colors_list = [product_colors.get(name.split()[0], '#95A5A6') for name in units_by_product.index]
+    
+    fig2 = go.Figure()
+    fig2.add_trace(go.Bar(
+        x=units_by_product.values, y=product_names, orientation='h',
+        marker=dict(color=colors_list, line=dict(color='white', width=1.5)), opacity=0.85
+    ))
+    fig2.update_layout(
+        title=dict(text="Total Units Sold per Product", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
+        height=400, showlegend=False,
+        plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
+        hovermode='closest',
+        xaxis=dict(
+            title="Units Sold",
+            title_font=dict(color='#34495E', size=12, family='Arial, sans-serif', weight='bold'),
+            gridcolor='rgba(0,0,0,0.3)', gridwidth=0.8, griddash='dash',
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+        ),
+        yaxis=dict(
+            title="",
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+        ),
+        margin=dict(l=0, r=20, t=70, b=50),
+        font=dict(size=10, color='#34495E', family='Arial, sans-serif', weight='bold')
+    )
     st.plotly_chart(fig2, use_container_width=True)
 
-with col2:
-    st.subheader("🏭 Production vs Sales (Top 8)")
-    prod_by_product = production.groupby('product_name')['quantity_produced'].sum()
-    sales_by_product = sales.groupby('product_name')['quantity_sold'].sum()
-    comparison = pd.DataFrame({
-        'Produced': prod_by_product,
-        'Sold': sales_by_product
-    }).fillna(0).sort_values('Produced', ascending=False).head(8)
-    
-    fig3 = go.Figure()
-    fig3.add_trace(go.Bar(name='Produced', x=comparison.index, y=comparison['Produced'],
-                         marker_color='#06A77D'))
-    fig3.add_trace(go.Bar(name='Recorded Sales', x=comparison.index, y=comparison['Sold'],
-                         marker_color='#C73E1D'))
-    fig3.update_layout(barmode='group', height=400, 
-                      xaxis_title="Product", yaxis_title="Units",
-                      legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-    st.plotly_chart(fig3, use_container_width=True)
-
-# Chart 4: 250ml vs 500ml Performance
-st.subheader("🥤 250ml vs 500ml Performance")
-size_comparison = sales.groupby('product_size').agg({
-    'quantity_sold': 'sum',
-    'total_sales': 'sum'
-}).reset_index()
-
-fig4 = make_subplots(specs=[[{"secondary_y": True}]])
-fig4.add_trace(
-    go.Bar(name='Units Sold', x=size_comparison['product_size'], 
-           y=size_comparison['quantity_sold'], marker_color='#F18F01'),
-    secondary_y=False,
-)
-fig4.add_trace(
-    go.Bar(name='Revenue', x=size_comparison['product_size'], 
-           y=size_comparison['total_sales'], marker_color='#A23B72'),
-    secondary_y=True,
-)
-fig4.update_xaxes(title_text="Size")
-fig4.update_yaxes(title_text="Units Sold", secondary_y=False)
-fig4.update_yaxes(title_text="Revenue (₦)", secondary_y=True, tickformat=".0f")
-fig4.update_layout(height=400, barmode='group',
-                  legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-st.plotly_chart(fig4, use_container_width=True)
-
-# Chart 5 & 6: Side by side
+# ROW 2: 2 charts side by side
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("🍓 Revenue by Flavor")
-    flavor_revenue = sales.groupby('product_flavor')['total_sales'].sum().sort_values(ascending=True)
-    fig5 = px.bar(flavor_revenue, orientation='h',
-                 labels={'value': 'Revenue (₦)', 'index': 'Flavor'},
-                 color_discrete_sequence=['#A23B72'])
-    fig5.update_layout(height=400, showlegend=False,
-                      xaxis_title="Revenue (₦)", yaxis_title="",
-                      xaxis=dict(tickformat=".0f"))
-    st.plotly_chart(fig5, use_container_width=True)
+    prod_by_product = production.groupby('product_name')['quantity_produced'].sum()
+    sales_by_product = sales.groupby('product_name')['quantity_sold'].sum()
+    comparison = pd.DataFrame({'Produced': prod_by_product, 'Sold': sales_by_product}).fillna(0).sort_values('Sold', ascending=False).head(8)
+    short_names = [f"{name.split()[0]}<br>{'500' if '500ml' in name else '250'}" for name in comparison.index]
+    
+    fig3 = go.Figure()
+    fig3.add_trace(go.Bar(name='Produced', x=short_names, y=comparison['Produced'], marker=dict(color='#06A77D', line=dict(color='white', width=1.5)), opacity=0.85))
+    fig3.add_trace(go.Bar(name='Recorded Sales', x=short_names, y=comparison['Sold'], marker=dict(color='#C73E1D', line=dict(color='white', width=1.5)), opacity=0.85))
+    fig3.update_layout(
+        title=dict(text="Production vs Recorded Sales", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
+        barmode='group', height=400,
+        plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
+        hovermode='closest',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, bgcolor='rgba(255,255,255,0.95)', font=dict(size=11, color='#2C3E50', family='Arial, sans-serif', weight='bold')),
+        yaxis=dict(
+            title="Units",
+            title_font=dict(color='#34495E', size=12, family='Arial, sans-serif', weight='bold'),
+            gridcolor='rgba(0,0,0,0.3)', gridwidth=0.8, griddash='dash',
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+        ),
+        xaxis=dict(
+            title="",
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+        ),
+        margin=dict(l=60, r=20, t=80, b=60),
+        font=dict(size=10, color='#34495E', family='Arial, sans-serif', weight='bold')
+    )
+    st.plotly_chart(fig3, use_container_width=True)
 
 with col2:
-    st.subheader("💰 Top 5 Products by Revenue")
-    top_products = sales.groupby('product_name')['total_sales'].sum().sort_values(ascending=True).tail(5)
-    fig6 = px.bar(top_products, orientation='h',
-                 labels={'value': 'Revenue (₦)', 'index': 'Product'},
-                 color_discrete_sequence=['#06A77D'])
-    fig6.update_layout(height=400, showlegend=False,
-                      xaxis_title="Revenue (₦)", yaxis_title="",
-                      xaxis=dict(tickformat=".0f"))
+    top_5_products = sales.groupby('product_name')['total_sales'].sum().sort_values(ascending=False).head(5)
+    product_names = [f"{name.split()[0]} {'500' if '500ml' in name else '250'}" for name in top_5_products.index]
+    colors_list = [product_colors.get(name.split()[0], '#95A5A6') for name in top_5_products.index]
+    
+    max_rev_top5 = top_5_products.max()
+    rev_ticks_top5 = []
+    rev_labels_top5 = []
+    step_top5 = max(100000, max_rev_top5 / 4)
+    for i in range(5):
+        val = i * step_top5
+        if val <= max_rev_top5 * 1.2:
+            rev_ticks_top5.append(val)
+            if val >= 1e6:
+                rev_labels_top5.append(f'{val/1e6:.1f}M')
+            else:
+                rev_labels_top5.append(f'{val/1e3:.0f}K')
+    
+    fig6 = go.Figure()
+    fig6.add_trace(go.Bar(x=top_5_products.values, y=product_names, orientation='h',
+                         marker=dict(color=colors_list, line=dict(color='white', width=1.5)), opacity=0.85))
+    fig6.update_layout(
+        title=dict(text="Top 5 Products by Revenue", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
+        height=400, showlegend=False,
+        plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
+        hovermode='closest',
+        xaxis=dict(
+            title="Revenue (₦)",
+            title_font=dict(color='#34495E', size=12, family='Arial, sans-serif', weight='bold'),
+            gridcolor='rgba(0,0,0,0.3)', gridwidth=0.8, griddash='dash',
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold'),
+            tickvals=rev_ticks_top5,
+            ticktext=rev_labels_top5
+        ),
+        yaxis=dict(
+            title="",
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+        ),
+        margin=dict(l=0, r=20, t=70, b=50),
+        font=dict(size=10, color='#34495E', family='Arial, sans-serif', weight='bold')
+    )
     st.plotly_chart(fig6, use_container_width=True)
 
-# Data Limitations
-st.markdown("---")
-st.markdown("### 📋 Data Limitations & Reporting Confidence")
-st.info("""
-**Figures reflect recorded entries only; manual logging may cause gaps or inconsistencies.**
+# ROW 3: 2 charts side by side
+col1, col2 = st.columns(2)
 
-- Sales data recorded on **42 days** out of ~60 business days (10 days missing from logs)
-- Production records are irregular (18 production days over 2 months)
-- No expiry, batch, or waste tracking data available
-- Some sales may be unlogged (manual entry system)
-""")
+with col1:
+    size_comparison = sales.groupby('product_size').agg({'quantity_sold': 'sum', 'total_sales': 'sum'}).reset_index()
+    
+    # Create 4 separate bars: 2 for 250ml (units + revenue), 2 for 500ml (units + revenue)
+    fig4 = make_subplots(specs=[[{"secondary_y": True}]])
+    
+    # Position bars side by side for each size
+    x_positions = []
+    x_labels = []
+    for size in size_comparison['product_size']:
+        x_positions.extend([f'{size}_units', f'{size}_revenue'])
+        x_labels.extend([f'{size}<br>Units', f'{size}<br>Revenue'])
+    
+    # 250ml bars
+    size_250 = size_comparison[size_comparison['product_size'] == '250ml'].iloc[0]
+    fig4.add_trace(go.Bar(name='250ml Units', x=['250ml_units'], y=[size_250['quantity_sold']],
+                          marker=dict(color='#F18F01', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=False)
+    fig4.add_trace(go.Bar(name='250ml Revenue', x=['250ml_revenue'], y=[size_250['total_sales']],
+                          marker=dict(color='#A23B72', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=True)
+    
+    # 500ml bars
+    size_500 = size_comparison[size_comparison['product_size'] == '500ml'].iloc[0]
+    fig4.add_trace(go.Bar(name='500ml Units', x=['500ml_units'], y=[size_500['quantity_sold']],
+                          marker=dict(color='#F18F01', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=False)
+    fig4.add_trace(go.Bar(name='500ml Revenue', x=['500ml_revenue'], y=[size_500['total_sales']],
+                          marker=dict(color='#A23B72', line=dict(color='white', width=1.5)), opacity=0.85), secondary_y=True)
+    
+    fig4.update_xaxes(
+        title_text="",
+        tickmode='array',
+        tickvals=['250ml_units', '250ml_revenue', '500ml_units', '500ml_revenue'],
+        ticktext=['250ml<br>Units', '250ml<br>Revenue', '500ml<br>Units', '500ml<br>Revenue'],
+        tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+    )
+    fig4.update_yaxes(
+        title_text="Units Sold", secondary_y=False,
+        tickcolor='#F18F01',
+        gridcolor='rgba(0,0,0,0.3)', gridwidth=0.8, griddash='dash',
+        title_font=dict(color='#F18F01', size=12, family='Arial, sans-serif', weight='bold'),
+        tickfont=dict(color='#F18F01', size=10, family='Arial, sans-serif', weight='bold')
+    )
+    
+    # Calculate revenue tick values with auto K/M formatting
+    max_revenue = size_comparison['total_sales'].max()
+    revenue_ticks = []
+    revenue_labels = []
+    step = max(500000, max_revenue / 4)
+    for i in range(5):
+        val = i * step
+        if val <= max_revenue * 1.2:
+            revenue_ticks.append(val)
+            if val >= 1e6:
+                revenue_labels.append(f'{val/1e6:.1f}M')
+            else:
+                revenue_labels.append(f'{val/1e3:.0f}K')
+    
+    fig4.update_yaxes(
+        title_text="Revenue (₦)", secondary_y=True,
+        tickcolor='#A23B72',
+        title_font=dict(color='#A23B72', size=12, family='Arial, sans-serif', weight='bold'),
+        tickfont=dict(color='#A23B72', size=10, family='Arial, sans-serif', weight='bold'),
+        tickvals=revenue_ticks,
+        ticktext=revenue_labels
+    )
+    fig4.update_layout(
+        title=dict(text="250ml vs 500ml Performance", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
+        height=400, barmode='group', plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
+        legend=dict(
+            orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5,
+            bgcolor='rgba(255,255,255,0.95)',
+            font=dict(size=11, color='#2C3E50', family='Arial, sans-serif', weight='bold')
+        ),
+        margin=dict(l=60, r=60, t=80, b=90),
+        font=dict(size=11, color='#34495E', family='Arial, sans-serif')
+    )
+    st.plotly_chart(fig4, use_container_width=True)
 
-# Footer
+with col2:
+    flavor_revenue = sales.groupby('product_flavor')['total_sales'].sum().sort_values(ascending=False)
+    colors = [product_colors.get(flavor, '#95A5A6') for flavor in flavor_revenue.index]
+    
+    max_rev_flavor = flavor_revenue.max()
+    rev_ticks_flavor = []
+    rev_labels_flavor = []
+    step_flavor = max(200000, max_rev_flavor / 4)
+    for i in range(5):
+        val = i * step_flavor
+        if val <= max_rev_flavor * 1.2:
+            rev_ticks_flavor.append(val)
+            if val >= 1e6:
+                rev_labels_flavor.append(f'{val/1e6:.1f}M')
+            else:
+                rev_labels_flavor.append(f'{val/1e3:.0f}K')
+    
+    fig5 = go.Figure()
+    fig5.add_trace(go.Bar(x=flavor_revenue.index, y=flavor_revenue.values,
+                         marker=dict(color=colors, line=dict(color='white', width=1.5)), opacity=0.85))
+    fig5.update_layout(
+        title=dict(text="Revenue by Flavor", font=dict(size=16, color='#2C3E50', family='Arial, sans-serif', weight='bold'), x=0.5, xanchor='center'),
+        height=400, showlegend=False,
+        plot_bgcolor='#FAFAFA', paper_bgcolor='#FFFFFF',
+        hovermode='closest',
+        yaxis=dict(
+            title="Revenue (₦)",
+            title_font=dict(color='#34495E', size=12, family='Arial, sans-serif', weight='bold'),
+            gridcolor='rgba(0,0,0,0.3)', gridwidth=0.8, griddash='dash',
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold'),
+            tickvals=rev_ticks_flavor,
+            ticktext=rev_labels_flavor
+        ),
+        xaxis=dict(
+            title="",
+            tickfont=dict(color='#34495E', size=10, family='Arial, sans-serif', weight='bold')
+        ),
+        margin=dict(l=60, r=20, t=80, b=90),
+        font=dict(size=10, color='#34495E', family='Arial, sans-serif', weight='bold')
+    )
+    st.plotly_chart(fig5, use_container_width=True)
+
+# Footer - enhanced
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #7F8C8D; font-size: 0.9rem;'>
-    FreshDay Yoghurt Analysis | March–April 2024
+<div style='text-align: center; color: #95A5A6; font-size: 0.75rem; font-style: italic; padding: 1.5rem 0 0.5rem 0; line-height: 1.6;'>
+    Figures reflect recorded entries only; manual logging may cause gaps or inconsistencies.
 </div>
 """, unsafe_allow_html=True)
-
