@@ -1,0 +1,31 @@
+# Scripts
+scripts/
+*.py
+
+# Requirements
+requirements.txt
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+raw_data/
+dashboards/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
