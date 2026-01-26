@@ -1,4 +1,4 @@
-# FreshDay Yoghurt Analysis
+# Data Integrity & Operational Analysis
 
 **Interactive Dashboard:** [View Dashboard](https://ann-allies.streamlit.app/)
 
